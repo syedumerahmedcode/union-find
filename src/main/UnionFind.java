@@ -22,9 +22,7 @@ public class UnionFind {
 
 	public UnionFind(int size) {
 
-		if (size <= 0) {
-			throw new IllegalArgumentException("size<=0 is not allowed.");
-		}
+		throwErrorIfSizeInputIsLessThanOne(size);
 
 		// Initial setup where number of elements in union find and the number of
 		// components in the union find are equal
@@ -45,27 +43,14 @@ public class UnionFind {
 	/**
 	 * Find which component/set 'p' belongs to, takes amortized constant time.
 	 * 
-	 * @param elementToFind
+	 * @param inputElement
 	 * @return
 	 */
-	public int find(int elementToFind) {
+	public int find(int inputElement) {
 
-		// Find the root of the component
-		int root = elementToFind;
-		// loop through till we have not reached the root
-		while (root != id[root]) {
-			root = id[root];
-		}
+		int root = findRootOfInputElement(inputElement);
 
-		// Compress the path leading to the root.
-		// This is called 'path compression'
-		// This operation gives amortized constant time complexity
-		while (elementToFind != root) {
-			int parent = id[elementToFind];
-			id[elementToFind] = root;
-			elementToFind = parent;
-
-		}
+		compressPathTillRoot(inputElement, root);
 		return root;
 	}
 
@@ -119,19 +104,60 @@ public class UnionFind {
 			return;
 		}
 
-		// Merge the two components/sets together.
-		// Merge smaller component/set into the larger one
+		mergeSmallerComponentIntoLargerComponent(firstRoot, secondRoot);
+
+		// Since the root are different and an alignment has taken place, we decrease
+		// the number of components by 1
+		numberOfComponents--;
+	}
+
+	private void throwErrorIfSizeInputIsLessThanOne(int size) {
+		if (size <= 0) {
+			throw new IllegalArgumentException("size<=0 is not allowed.");
+		}
+	}
+
+	/**
+	 * Merge the two components/sets together. Merge smaller component/set into the
+	 * larger one
+	 * 
+	 * @param firstRoot
+	 * @param secondRoot
+	 */
+	private void mergeSmallerComponentIntoLargerComponent(int firstRoot, int secondRoot) {
 		if (sz[firstRoot] < sz[secondRoot]) {
 			sz[secondRoot] += sz[firstRoot];
 			id[firstRoot] = secondRoot;
 		} else {
 			sz[firstRoot] += sz[secondRoot];
-			id[secondRoot] = firstElement;
+			id[secondRoot] = firstRoot;
 		}
+	}
 
-		// Since the root are different and an alignment has taken place, we decrease
-		// the number of components by 1
-		numberOfComponents--;
+	private int findRootOfInputElement(int elementToFind) {
+		// Find the root of the component
+		int root = elementToFind;
+		// loop through till we have not reached the root
+		while (root != id[root]) {
+			root = id[root];
+		}
+		return root;
+	}
+
+	/**
+	 * Compress the path leading to the root. This is called 'path compression' This
+	 * operation gives amortized constant time complexity
+	 * 
+	 * @param elementToFind
+	 * @param root
+	 */
+	private void compressPathTillRoot(int elementToFind, int root) {
+		while (elementToFind != root) {
+			int parent = id[elementToFind];
+			id[elementToFind] = root;
+			elementToFind = parent;
+
+		}
 	}
 
 }
